@@ -68,7 +68,7 @@ export function CartSidebar() {
 
                   <div className="flex-1">
                     <h3 className="font-semibold">{item.name}</h3>
-                    <p className="text-primary font-bold text-lg">${item.price}</p>
+                    <p className="text-primary font-bold text-lg">C${item.price}</p>
 
                     <div className="flex items-center gap-2 mt-2">
                       <button
@@ -99,7 +99,7 @@ export function CartSidebar() {
             <div className="border-t border-border p-6 space-y-4">
               <div className="flex items-center justify-between text-lg font-bold">
                 <span>Total:</span>
-                <span className="text-primary">${total.toFixed(2)}</span>
+                <span className="text-primary">C${total.toFixed(2)}</span>
               </div>
 
               <button className="w-full bg-primary text-primary-foreground py-3 rounded-lg hover:opacity-90 transition font-semibold">
