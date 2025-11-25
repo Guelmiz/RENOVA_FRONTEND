@@ -1,76 +1,110 @@
-"use client"
+import Link from "next/link";
+import { Star, User } from "lucide-react";
 
-import Link from "next/link"
-
-interface Producto {
-  categoria: string
-  nombre: string
-  precio: number
-  rating: number
-  imagen: string
+interface Product {
+  categoria: string;
+  nombre: string;
+  rating: number;
+  precio: number;
+  imagen: string;
 }
 
 interface TallerSectionProps {
-  tallerId: string | number
-  tallerNombre: string
-  icono: string
-  rating: number
-  anos: number
-  colorBorde: string
-  productos: Producto[]
+  tallerId: number | string;
+  tallerNombre: string;
+  imagenPerfil?: string | null; 
+  rating: number;
+  colorBorde: string;
+  productos: Product[];
 }
 
 export function TallerSection({
   tallerId,
   tallerNombre,
-  icono,
+  imagenPerfil,
   rating,
-  anos,
   colorBorde,
   productos,
 }: TallerSectionProps) {
   return (
-    <section className={`border-t-4 ${colorBorde} mt-8 pt-6 pb-8`}>
-      {/* Header del taller */}
-      <div className="flex items-center justify-between px-3 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="text-2xl">{icono}</div>
-          <h2 className="text-xl font-semibold">{tallerNombre}</h2>
-          <span className="text-sm text-muted-foreground">
-            ⭐ {rating} — {anos} años en el mercado
-          </span>
+    <section className="space-y-6">
+      {/* Encabezado del Taller */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          
+          {/* FOTO DE PERFIL */}
+          <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 flex items-center justify-center bg-gray-100">
+            {imagenPerfil ? (
+              <img 
+                src={imagenPerfil} 
+                alt={tallerNombre} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+           
+              <User className="w-6 h-6 text-gray-400" />
+            )}
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              {tallerNombre}
+            </h2>
+            
+            {/* RATING (Sin los años) */}
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+              <span className="font-medium text-foreground">{rating}</span>
+              {/* Texto de años eliminado */}
+            </div>
+          </div>
         </div>
 
-        {/* 🔥 Botón NUEVO: redirige al taller específico */}
-        <Link
-          href={`/taller/${tallerId}`}
-          className="rounded-lg bg-foreground text-background px-4 py-2 text-sm font-medium hover:bg-foreground/90 transition"
+        <Link 
+            href={`/taller/${tallerId}`} 
+            className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition"
         >
           Ver Taller
         </Link>
       </div>
 
-      {/* Productos */}
-      <div className="flex flex-wrap gap-6 px-3">
-        {productos.map((p, i) => (
-          <div
-            key={i}
-            className="w-40 flex flex-col items-center text-center"
-          >
-            <img
-              src={p.imagen}
-              alt={p.nombre}
-              className="h-28 w-28 object-contain mb-2"
-            />
-            <p className="text-sm font-semibold text-muted-foreground">
-              {p.categoria}
-            </p>
-            <p className="text-sm">{p.nombre}</p>
-            <p className="text-xs text-yellow-600">⭐ {p.rating}</p>
-            <p className="text-base font-semibold">${p.precio.toFixed(2)}</p>
+      {/* Grid de Productos (Manteniendo tu diseño) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {productos.map((prod, idx) => (
+          <div key={idx} className="group flex flex-col items-center text-center space-y-3">
+            {/* Card Imagen */}
+            <div className={`relative aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 border-2 ${colorBorde} p-4 transition-transform duration-300 group-hover:scale-105`}>
+                {prod.imagen ? (
+                    <img 
+                        src={prod.imagen} 
+                        alt={prod.nombre} 
+                        className="h-full w-full object-contain mix-blend-multiply" 
+                    />
+                ) : (
+                    <div className="h-full w-full flex items-center justify-center text-gray-400 text-xs">Sin imagen</div>
+                )}
+            </div>
+
+            {/* Info Producto */}
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">{prod.categoria}</p>
+              <h3 className="font-medium text-foreground line-clamp-1">{prod.nombre}</h3>
+              
+              <div className="flex items-center justify-center gap-1 text-xs text-yellow-500">
+                <Star className="w-3 h-3 fill-current" />
+                <span>{prod.rating}</span>
+              </div>
+              
+              <p className="text-lg font-bold text-foreground">
+                ${Number(prod.precio).toFixed(2)}
+              </p>
+            </div>
           </div>
         ))}
       </div>
+      
+      {/* Separador visual opcional */}
+      <hr className="border-gray-100 mt-12" />
     </section>
-  )
+  );
 }
