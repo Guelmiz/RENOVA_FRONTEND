@@ -1,15 +1,23 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation" 
 import { X, Trash2, Plus, Minus } from "lucide-react"
 import { useCart } from "@/context/cart-contex"
 
 export function CartSidebar() {
   const { items, removeFromCart, updateQuantity, clearCart, total } = useCart()
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter() 
+  
+  const handleCheckout = () => {
+    setIsOpen(false) 
+    router.push("/checkout") 
+  }
 
   return (
     <>
+      {/* Botón flotante original */}
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-40 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:opacity-90 transition flex items-center justify-center"
@@ -31,8 +39,15 @@ export function CartSidebar() {
         </div>
       </button>
 
-      {isOpen && <div className="fixed inset-0 z-40 bg-black/50 transition-opacity" onClick={() => setIsOpen(false)} />}
+      {/* Fondo oscuro */}
+      {isOpen && (
+        <div 
+            className="fixed inset-0 z-40 bg-black/50 transition-opacity" 
+            onClick={() => setIsOpen(false)} 
+        />
+      )}
 
+      {/* Panel Lateral (Animación estándar duration-300) */}
       <div
         className={`fixed right-0 top-0 h-full w-full max-w-md bg-background shadow-lg z-50 transform transition-transform duration-300 overflow-y-auto ${
           isOpen ? "translate-x-0" : "translate-x-full"
@@ -68,7 +83,7 @@ export function CartSidebar() {
 
                   <div className="flex-1">
                     <h3 className="font-semibold">{item.name}</h3>
-                    <p className="text-primary font-bold text-lg">C${item.price}</p>
+                    <p className="text-primary font-bold text-lg">C${item.price.toFixed(2)}</p>
 
                     <div className="flex items-center gap-2 mt-2">
                       <button
@@ -102,7 +117,11 @@ export function CartSidebar() {
                 <span className="text-primary">C${total.toFixed(2)}</span>
               </div>
 
-              <button className="w-full bg-primary text-primary-foreground py-3 rounded-lg hover:opacity-90 transition font-semibold">
+              {/* BOTÓN CONECTADO */}
+              <button 
+                onClick={handleCheckout} 
+                className="w-full bg-primary text-primary-foreground py-3 rounded-lg hover:opacity-90 transition font-semibold"
+              >
                 Proceder al Checkout
               </button>
 
@@ -118,4 +137,4 @@ export function CartSidebar() {
       </div>
     </>
   )
-}
+} 
