@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Para redirigir al terminar
-import { CheckCircle, XCircle, X } from "lucide-react"; // Iconos para el Toast
+import { useRouter } from "next/navigation";
+import { CheckCircle, XCircle, X } from "lucide-react"; 
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -15,8 +15,6 @@ export default function SubirProductoPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>("Básico");
   const [loading, setLoading] = useState(false);
-
-  // --- ESTADO PARA TOAST (Notificaciones) ---
   const [toast, setToast] = useState<{ show: boolean; message: string; type: "success" | "error" } | null>(null);
 
   const showToast = (message: string, type: "success" | "error") => {
@@ -59,13 +57,10 @@ export default function SubirProductoPage() {
   };
 
   const handleSubmit = async () => {
-    // 1. Validaciones
     if (!formData.nombre || !formData.categoriaId) {
       showToast("Faltan datos básicos (Nombre o Categoría)", "error");
       return;
     }
-
-    // 2. Obtener Token (Lógica robusta renova_auth)
     let token = null;
     try {
         const sessionData = localStorage.getItem("renova_auth");
@@ -84,16 +79,12 @@ export default function SubirProductoPage() {
 
     try {
       setLoading(true);
-
-      // 3. Subir Imágenes
       const uploadedImages = await Promise.all(
         files.map(async (file, index) => ({
           url: await uploadToCloudinary(file),
           esPrincipal: index === principalIndex,
         }))
       );
-
-      // 4. Payload
       const payload = {
         titulo: formData.nombre,
         marca: formData.marca,
@@ -105,8 +96,6 @@ export default function SubirProductoPage() {
         pruebas: selectedPruebas,
         certificaciones: selectedCerts,
       };
-
-      // 5. Enviar al Backend
       const res = await fetch(`${API_BASE}/api/productos`, {
         method: "POST",
         headers: {
@@ -118,14 +107,8 @@ export default function SubirProductoPage() {
 
       if (res.ok) {
         showToast("¡Producto publicado exitosamente!", "success");
-        
-        // Esperamos un poco para que el usuario lea el mensaje y luego redirigimos
         setTimeout(() => {
-            // Opción A: Ir a "Mis Productos" para verlo
             router.push("/products/my-products");
-            
-            // Opción B: Recargar si quieres seguir subiendo (descomenta la siguiente linea)
-            // window.location.reload();
         }, 2000);
 
       } else {

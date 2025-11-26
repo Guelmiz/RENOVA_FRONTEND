@@ -29,29 +29,22 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, token } = useUser();
-  const { addToCart } = useCart(); // Contexto del carrito
+  const { addToCart } = useCart(); 
   const id = params?.id as string;
 
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
-  // Estados UI
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("Reseña");
-
-  // Estados reseña
   const [userRating, setUserRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
-
-  // --- ESTADO PARA EL MODAL DE MODERACIÓN ---
   const [reviewToModerate, setReviewToModerate] = useState<{
     id: string;
     status: string;
   } | null>(null);
 
-  // --- ESTADO PARA NOTIFICACIONES (TOAST) ---
   const [toast, setToast] = useState<{
     show: boolean;
     message: string;
@@ -62,8 +55,6 @@ export default function ProductDetailPage() {
     setToast({ show: true, message, type });
     setTimeout(() => setToast(null), 3000);
   };
-
-  // Verificar si es ADMIN
   const isAdmin = user?.roles?.some(
     (r) =>
       String(r).toUpperCase() === "ADMINISTRADOR" ||
@@ -94,13 +85,9 @@ export default function ProductDetailPage() {
       setLoading(false);
     }
   };
-
-  // Abrir modal de confirmación
   const openModerateModal = (reviewId: string, currentStatus: string) => {
     setReviewToModerate({ id: reviewId, status: currentStatus });
   };
-
-  // Confirmar acción de moderación
   const confirmModeration = async () => {
     if (!reviewToModerate) return;
 
@@ -135,7 +122,7 @@ export default function ProductDetailPage() {
       console.error(error);
       showToast("Error de conexión", "error");
     } finally {
-      setReviewToModerate(null); // Cerrar modal
+      setReviewToModerate(null); 
     }
   };
 
@@ -194,7 +181,6 @@ export default function ProductDetailPage() {
 
   const reviews = product.resenas || [];
 
-  // Calcular promedio visual
   const avgRating =
     reviews.length > 0
       ? (

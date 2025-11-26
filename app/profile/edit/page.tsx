@@ -4,9 +4,7 @@ import { useState, useRef, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useUser } from "@/context/user-contex"
-import { Camera } from "lucide-react" // Importamos icono de cámara
-
-// --- CONFIGURACIÓN ---
+import { Camera } from "lucide-react" 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000"
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -14,10 +12,7 @@ const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 export default function EditProfilePage() {
   const { user, token, setUserAndToken } = useUser()
   const router = useRouter()
-
-  // Referencia para el input de archivo oculto
   const fileInputRef = useRef<HTMLInputElement>(null)
-
   if (!user) {
     router.push("/login")
     return null
@@ -30,16 +25,12 @@ export default function EditProfilePage() {
     birthDate: user.birthDate || "",
     email: user.email || "",
   })
-
-  // Estados para la imagen
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(user.imagen || null)
 
   const [showConfirmEdit, setShowConfirmEdit] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // --- SUBIR A CLOUDINARY ---
   const uploadToCloudinary = async (file: File) => {
     if (!CLOUD_NAME || !UPLOAD_PRESET) throw new Error("Faltan credenciales de Cloudinary");
 
@@ -56,8 +47,6 @@ export default function EditProfilePage() {
     const data = await res.json();
     return data.secure_url;
   };
-
-  // --- MANEJO DE CAMBIOS ---
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -66,8 +55,7 @@ export default function EditProfilePage() {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setSelectedFile(file)
-      // Crear URL temporal para previsualizar
+      setSelectedFile(file);
       const url = URL.createObjectURL(file)
       setPreviewUrl(url)
     }
@@ -80,7 +68,6 @@ export default function EditProfilePage() {
 
   const handleCancelEdit = () => {
     setShowConfirmEdit(false)
-    // Si cancela, restauramos la imagen original si no se guardó
     if (selectedFile) {
         setSelectedFile(null)
         setPreviewUrl(user.imagen || null)
@@ -93,9 +80,7 @@ export default function EditProfilePage() {
     setError(null)
 
     try {
-      let finalImageUrl = user.imagen; // Por defecto la que ya tenía
-
-      // 1. Si hay nueva foto, la subimos primero
+      let finalImageUrl = user.imagen; 
       if (selectedFile) {
         try {
             finalImageUrl = await uploadToCloudinary(selectedFile);
@@ -103,18 +88,14 @@ export default function EditProfilePage() {
             throw new Error("Falló la subida de la imagen. Intenta de nuevo.");
         }
       }
-
-      // 2. Preparamos el body
       const body = {
         nombreUsuario: formData.username,
         email: formData.email,
         nombreCompleto: formData.fullName,
         telefono: formData.phone || null,
         fechaNacimiento: formData.birthDate || null,
-        imagen: finalImageUrl // Enviamos la URL (nueva o vieja)
+        imagen: finalImageUrl 
       }
-
-      // 3. Enviamos al backend
       const res = await fetch(`${API_BASE}/api/users/${user.id}`, {
         method: "PUT",
         headers: {
@@ -141,7 +122,6 @@ export default function EditProfilePage() {
           phone: String(updated.persona?.telefono ?? formData.phone ?? ""),
           birthDate: updated.persona?.fechaNacimiento ?? formData.birthDate,
           registeredAt: user.registeredAt,
-          // Mantenemos roles y actualizamos imagen
           roles: user.roles ?? [], 
           imagen: updated.imagen ?? finalImageUrl 
         }

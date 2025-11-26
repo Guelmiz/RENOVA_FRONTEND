@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { 
   Edit, Plus, Package, Search, X, Save, AlertCircle, 
-  CheckCircle, XCircle // Nuevos iconos
+  CheckCircle, XCircle 
 } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -14,18 +14,13 @@ export default function MyProductsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
-
-  // --- ESTADO PARA LA NOTIFICACIÓN (TOAST) ---
   const [toast, setToast] = useState<{ show: boolean; message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     fetchMyProducts();
   }, []);
-
-  // Función para mostrar notificaciones temporales
   const showToast = (message: string, type: "success" | "error") => {
     setToast({ show: true, message, type });
-    // Ocultar automáticamente después de 3 segundos
     setTimeout(() => {
       setToast(null);
     }, 3000);
@@ -78,14 +73,11 @@ export default function MyProductsPage() {
       });
 
       if (res.ok) {
-        // Actualizar la lista localmente
         setProducts((prev) =>
           prev.map((p) => (p.id === id ? { ...p, ...updatedData } : p))
         );
         
-        setEditingProduct(null); // Cerrar modal
-        
-        // --- USAMOS EL TOAST EN VEZ DE ALERT ---
+        setEditingProduct(null); 
         showToast("Producto actualizado correctamente", "success");
       } else {
         const err = await res.json();
@@ -223,7 +215,6 @@ export default function MyProductsPage() {
   );
 }
 
-// --- COMPONENTE MODAL ---
 function EditProductModal({ product, onClose, onSave }: { product: any; onClose: () => void; onSave: (id: string, data: any) => void }) {
   const [form, setForm] = useState({
     titulo: product.titulo,

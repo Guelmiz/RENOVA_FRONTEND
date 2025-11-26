@@ -234,8 +234,6 @@ export default function ProfilePage() {
     </main>
   );
 }
-
-// Componente pequeño para campos tipo input deshabilitado
 function FieldBlock({ label, value }: { label: string; value?: string }) {
   return (
     <div className="space-y-1.5">
