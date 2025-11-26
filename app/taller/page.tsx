@@ -196,7 +196,7 @@ export default function TallerDetailPage({ params }: { params: { id: string } })
                 </span>
                 {taller.ubicacion && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-800 px-3 py-1">
-                    📍 {taller.ubicacion}
+                   {taller.ubicacion}
                   </span>
                 )}
               </div>
@@ -205,10 +205,10 @@ export default function TallerDetailPage({ params }: { params: { id: string } })
 
           <div className="flex flex-col items-start md:items-end gap-2 text-xs sm:text-sm">
             <p className="text-muted-foreground">
-              ✅ Productos reacondicionados certificados
+               Productos reacondicionados certificados
             </p>
             <p className="text-muted-foreground">
-              🚚 Envíos a todo el país (aplícan restricciones)
+               Envíos a todo el país (aplícan restricciones)
             </p>
             <Link
               href="/subir-producto"
@@ -273,7 +273,7 @@ export default function TallerDetailPage({ params }: { params: { id: string } })
                 </div>
 
                 <p className="mt-1 text-base font-semibold text-foreground">
-                  ${p.precio.toFixed(2)}
+                  C${p.precio.toFixed(2)}
                 </p>
 
                 <button
