@@ -1,43 +1,56 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/context/user-contex";
+import Link from "next/link";
+import { loginRequest } from "../services/auth";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
+  const router = useRouter();
+  const { setUserAndToken } = useUser();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+  setIsLoading(true);
 
-    try {
-      if (!email || !password) {
-        setError("Por favor completa todos los campos")
-        return
-      }
+  try {
+    const data = await loginRequest(email, password);
 
-      if (!email.includes("@")) {
-        setError("Por favor ingresa un email válido")
-        return
-      }
+    console.log("📌 DATA.USER DESDE BACKEND:", data.user);
 
-      console.log("Login attempt:", { email, password })
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      alert("Inicio de sesión exitoso")
-    } catch (err) {
-      setError("Error al iniciar sesión. Intenta de nuevo.")
-    } finally {
-      setIsLoading(false)
-    }
+    const dto = data.user;
+
+    const mappedUser = {
+      id: dto.id,
+      username: dto.nombreUsuario,
+      email: dto.email,
+      fullName: dto.persona?.nombreCompleto ?? "",
+      phone: dto.persona?.telefono ? String(dto.persona.telefono) : "",
+      birthDate: dto.persona?.fechaNacimiento ?? "",
+      registeredAt: dto.fechaRegistro ?? "",
+      imagen: dto.imagen?.trim() ?? "",
+      roles: dto.roles ?? [], 
+    };
+
+    setUserAndToken(mappedUser, data.token);
+    router.push("/");
+  } catch (err: any) {
+    console.error(err);
+    setError(err.message || "Error inesperado");
+  } finally {
+    setIsLoading(false);
   }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
@@ -63,7 +76,10 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Field */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-foreground"
+              >
                 Correo Electrónico
               </label>
               <div className="relative">
@@ -82,7 +98,10 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-foreground"
+              >
                 Contraseña
               </label>
               <div className="relative">
@@ -102,7 +121,11 @@ export default function LoginPage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
                   disabled={isLoading}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -110,10 +133,17 @@ export default function LoginPage() {
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 rounded border-border accent-primary" disabled={isLoading} />
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-border accent-primary"
+                  disabled={isLoading}
+                />
                 <span className="text-muted-foreground">Recuérdame</span>
               </label>
-              <Link href="#" className="text-primary hover:text-primary/80 font-medium transition">
+              <Link
+                href="#"
+                className="text-primary hover:text-primary/80 font-medium transition"
+              >
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
@@ -134,7 +164,9 @@ export default function LoginPage() {
               <div className="w-full border-t border-border"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-card text-muted-foreground">O continúa con</span>
+              <span className="px-2 bg-card text-muted-foreground">
+                O continúa con
+              </span>
             </div>
           </div>
 
@@ -163,15 +195,19 @@ export default function LoginPage() {
                   fill="#EA4335"
                 />
               </svg>
-              <span className="hidden sm:inline text-sm font-medium">Google</span>
+              <span className="hidden sm:inline text-sm font-medium">
+                Google
+              </span>
             </button>
-           
           </div>
 
           {/* Sign Up Link */}
           <p className="text-center text-sm text-muted-foreground">
             ¿No tienes cuenta?{" "}
-            <Link href="/register" className="text-primary hover:text-primary/80 font-medium transition">
+            <Link
+              href="/register"
+              className="text-primary hover:text-primary/80 font-medium transition"
+            >
               Regístrate aquí
             </Link>
           </p>
@@ -179,11 +215,14 @@ export default function LoginPage() {
 
         {/* Footer Link */}
         <div className="text-center mt-6">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition">
+          <Link
+            href="/"
+            className="text-sm text-muted-foreground hover:text-foreground transition"
+          >
             Volver a la página principal
           </Link>
         </div>
       </div>
     </div>
-  )
+  );
 }
