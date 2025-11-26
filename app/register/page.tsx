@@ -3,12 +3,12 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useUser } from "@/context/user-contex"
-import { User, Mail, Phone, Calendar, Lock, Eye, EyeOff } from "lucide-react"
+import { User, Mail, Phone, Calendar, Lock, Eye, EyeOff, Image as ImageIcon } from "lucide-react"
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000"
 
 export default function RegisterPage() {
   const router = useRouter()
-  const { setUser } = useUser()
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -16,9 +16,14 @@ export default function RegisterPage() {
     phone: "",
     birthDate: "",
     username: "",
+    email: "",
     password: "",
     confirmPassword: "",
+    image: ""
   })
+
+
+  const [imageFile, setImageFile] = useState<File | null>(null)
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -34,13 +39,19 @@ export default function RegisterPage() {
     }))
   }
 
+  // 👇 NUEVO: manejar el cambio de archivo
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null
+    setImageFile(file)
+  }
+
   const validateForm = () => {
     if (
       !formData.fullName ||
-      !formData.age ||
       !formData.phone ||
       !formData.birthDate ||
       !formData.username ||
+      !formData.email ||
       !formData.password ||
       !formData.confirmPassword
     ) {
@@ -48,12 +59,12 @@ export default function RegisterPage() {
       return false
     }
 
-    if (Number.parseInt(formData.age) < 18) {
-      setError("Debes ser mayor de 18 años para registrarte")
+    if (!formData.email.includes("@")) {
+      setError("Por favor ingresa un correo electrónico válido")
       return false
     }
 
-    if (formData.phone.length < 10) {
+    if (formData.phone.length < 8) {
       setError("Por favor ingresa un teléfono válido")
       return false
     }
@@ -88,17 +99,55 @@ export default function RegisterPage() {
         return
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      setUser({
-        fullName: formData.fullName,
-        age: formData.age,
-        phone: formData.phone,
-        birthDate: formData.birthDate,
-        username: formData.username,
-        registeredAt: new Date().toLocaleDateString("es-ES"),
+      // 1️⃣ Primero registramos al usuario (JSON como antes)
+      const res = await fetch(`${API_BASE}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombreUsuario: formData.username,
+          email: formData.email,
+          password: formData.password,
+          nombreCompleto: formData.fullName,
+          telefono: formData.phone,
+          fechaNacimiento: formData.birthDate,
+          rolNombre: "CLIENTE",
+        }),
       })
 
+      const data = await res.json().catch(() => ({} as any))
+
+      if (!res.ok) {
+        setError(data?.message || "Error al registrarse. Intenta de nuevo.")
+        setIsLoading(false)
+        return
+      }
+
+  
+      const userId: string | undefined = data?.data?.usuario?.id
+
+      if (imageFile && userId) {
+        const imageFormData = new FormData()
+        imageFormData.append("imagen", imageFile)
+
+        try {
+          const imgRes = await fetch(`${API_BASE}/api/usuarios/${userId}/imagen`, {
+            method: "POST",
+            body: imageFormData,
+          })
+
+          if (!imgRes.ok) {
+            // No rompemos el registro si falla la imagen, solo avisamos por consola
+            const imgErr = await imgRes.json().catch(() => ({}))
+            console.error("Error subiendo imagen de usuario:", imgErr)
+          }
+        } catch (imgErr) {
+          console.error("Error de red al subir imagen:", imgErr)
+        }
+      }
+
+    
       setSuccess(true)
       setFormData({
         fullName: "",
@@ -106,14 +155,18 @@ export default function RegisterPage() {
         phone: "",
         birthDate: "",
         username: "",
+        email: "",
         password: "",
         confirmPassword: "",
+        image: ""
       })
+      setImageFile(null)
 
       setTimeout(() => {
-        router.push("/profile")
+        router.push("/login")
       }, 1000)
     } catch (err) {
+      console.error(err)
       setError("Error al registrarse. Intenta de nuevo.")
     } finally {
       setIsLoading(false)
@@ -149,7 +202,7 @@ export default function RegisterPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Row 1: Full Name and Age */}
+            {/* Row 1: Full Name */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Full Name */}
               <div className="space-y-2">
@@ -171,24 +224,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Age */}
-              <div className="space-y-2">
-                <label htmlFor="age" className="block text-sm font-medium text-foreground">
-                  Edad
-                </label>
-                <input
-                  id="age"
-                  name="age"
-                  type="number"
-                  placeholder="25"
-                  min="18"
-                  max="120"
-                  value={formData.age}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  disabled={isLoading}
-                />
-              </div>
+              {/* (Edad la tienes vacía, la puedes usar o quitar) */}
             </div>
 
             {/* Row 2: Phone and Birth Date */}
@@ -204,7 +240,7 @@ export default function RegisterPage() {
                     id="phone"
                     name="phone"
                     type="tel"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="88887777"
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
@@ -233,13 +269,33 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Username */}
+            {/* Email */}
             <div className="space-y-2">
-              <label htmlFor="username" className="block text-sm font-medium text-foreground">
-                Nombre de Usuario
+              <label htmlFor="email" className="block text-sm font-medium text-foreground">
+                Correo electrónico
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="correo@ejemplo.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Username */}
+            <div className="space-y-2">
+              <label htmlFor="username" className="block text-lm font-medium text-foreground">
+                Nombre de Usuario
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <input
                   id="username"
                   name="username"
@@ -248,6 +304,25 @@ export default function RegisterPage() {
                   value={formData.username}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* 👇 NUEVO: Campo de imagen opcional */}
+            <div className="space-y-2">
+              <label htmlFor="image" className="block text-sm font-medium text-foreground">
+                Foto de perfil (opcional)
+              </label>
+              <div className="relative">
+                <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <input
+                  id="image"
+                  name="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-primary/10 file:text-sm file:text-primary hover:file:bg-primary/20"
                   disabled={isLoading}
                 />
               </div>
