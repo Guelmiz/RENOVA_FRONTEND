@@ -19,7 +19,6 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // Aquí iría la lógica de autenticación real
       if (!email || !password) {
         setError("Por favor completa todos los campos")
         return
@@ -31,10 +30,7 @@ export default function LoginPage() {
       }
 
       console.log("Login attempt:", { email, password })
-      // Simular delay de API
       await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // En una app real, aquí guardarías el token y redirigirías
       alert("Inicio de sesión exitoso")
     } catch (err) {
       setError("Error al iniciar sesión. Intenta de nuevo.")

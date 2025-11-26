@@ -78,7 +78,7 @@ export default function CartPage() {
   const iva = subtotal * ivaRate
   const total = subtotal + iva - productsDiscount
   const totalSaved = productsDiscount
-  const totalHeaderSavings = 1000 // solo visual, como en tu mockup
+  const totalHeaderSavings = 1000 
 
   const handleRemove = (id: number) => {
     setItems((prev) => prev.filter((item) => item.id !== id))
@@ -87,7 +87,6 @@ export default function CartPage() {
   const handleApplyCode = () => {
     if (!discountCode.trim()) return
     setAppliedCode(discountCode.trim().toUpperCase())
-    // Aquí luego podrás aplicar lógica real del descuento
   }
 
   return (
