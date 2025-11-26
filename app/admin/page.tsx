@@ -17,7 +17,7 @@ export default function AdminDashboard() {
 
   
   useEffect(() => {
-    if (user && !user.roles.some(r => r.toUpperCase().includes("ADMIN"))) {
+    if (user && !user.roles?.some(r => r.toUpperCase().includes("ADMIN"))) {
       router.push("/");
     }
   }, [user, router]);
