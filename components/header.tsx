@@ -11,16 +11,22 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { isLoggedIn, user, logout, token } = useUser();
-
   const router = useRouter();
-  const isRepresentante = user?.roles?.includes("Representante");
+
+  const isRepresentante = user?.roles?.some(
+    (r) => String(r).toUpperCase() === "REPRESENTANTE"
+  );
+  const isAdmin = user?.roles?.some(
+    (r) =>
+      String(r).toUpperCase() === "ADMINISTRADOR" ||
+      String(r).toUpperCase() === "ADMIN"
+  );
+
   const handleLogout = async () => {
     try {
-      if (token) {
-        await logoutRequest(token);
-      }
+      if (token) await logoutRequest(token);
     } catch (err) {
-      console.error("Error en logout backend:", err);
+      console.error(err);
     } finally {
       logout();
       setShowUserMenu(false);
@@ -30,193 +36,122 @@ export function Header() {
   };
 
   const renderAvatar = () => {
-    if (user?.imagen && user.imagen.trim() !== "") {
-      return (
-        <img
-          src={user.imagen}
-          alt="Avatar"
-          className="w-full h-full object-cover"
-        />
-      );
-    }
-
+    if (user?.imagen)
+      return <img src={user.imagen} className="w-full h-full object-cover" />;
     return <User className="w-4 h-4 text-primary-foreground" />;
   };
 
   return (
     <header className="fixed w-full top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-        {/* LOGO */}
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <ShoppingBag className="w-5 h-5 text-primary-foreground" />
           </div>
           <span
             onClick={() => router.push("/")}
-            className="text-xl font-bold text-primary cursor-pointer hover:opacity-80 active:scale-95 transition duration-150"
+            className="text-xl font-bold text-primary cursor-pointer"
           >
             RENOVA
           </span>
         </div>
 
-        {/* MENÚ DE ESCRITORIO */}
-        <div className="hidden md:flex items-center gap-8">
-          <a
-            href="/#productos"
-            className="text-foreground hover:text-primary transition"
-          >
+        <div className="hidden md:flex items-center gap-6">
+          <a href="/#productos" className="text-foreground hover:text-primary">
             Productos
           </a>
-          <a
-            href="/#beneficios"
-            className="text-foreground hover:text-primary transition"
-          >
+          <a href="/#beneficios" className="text-foreground hover:text-primary">
             Beneficios
           </a>
-          <a
-            href="/#nosotros"
-            className="text-foreground hover:text-primary transition"
+
+          <button
+            onClick={() => router.push("/products/catalogo")}
+            className="bg-primary text-primary-foreground px-5 py-2 rounded-lg hover:opacity-90 text-sm font-medium"
           >
-            Nosotros
-          </a>
-          <a
-            href="/#contacto"
-            className="text-foreground hover:text-primary transition"
-          >
-            Contacto
-          </a>
-          <button className="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:opacity-90 transition">
             Comprar
           </button>
 
-          {/* USUARIO LOGUEADO */}
-          {isLoggedIn && user ? (
-            <div className="relative">
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 text-foreground hover:text-primary transition font-medium"
-              >
-                {/* Contenedor del Avatar */}
-                <div className="w-8 h-8 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center overflow-hidden">
-                  {renderAvatar()}
-                </div>
-
-                <span className="text-sm max-w-[100px] truncate">
-                  {user.username}
-                </span>
-              </button>
-
-              {/* DROPDOWN MENU */}
-              {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-lg shadow-lg overflow-hidden">
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-2 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    Ver Perfil
-                  </Link>
-                  {isRepresentante && (
-                    <Link
-                      href="/products/catalogo" 
-                      className="block px-4 py-2 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Mis Productos (Catálogo)
-                    </Link>
-                  )}
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition flex items-center gap-2"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Cerrar Sesión
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link
-              href="/login"
-              className="text-foreground hover:text-primary transition font-medium"
-            >
-              Inicia Sesión
-            </Link>
-          )}
-        </div>
-
-        {/* BOTÓN MENÚ MÓVIL */}
-        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </nav>
-
-      {/* MENÚ MÓVIL DESPLEGABLE */}
-      {isOpen && (
-        <div className="md:hidden border-t border-border bg-background">
-          <div className="px-4 py-4 space-y-4">
-            <a
-              href="#productos"
-              className="block text-foreground hover:text-primary transition"
-            >
-              Productos
-            </a>
-            <a
-              href="#beneficios"
-              className="block text-foreground hover:text-primary transition"
-            >
-              Beneficios
-            </a>
-            <a
-              href="#nosotros"
-              className="block text-foreground hover:text-primary transition"
-            >
-              Nosotros
-            </a>
-            <a
-              href="#contacto"
-              className="block text-foreground hover:text-primary transition"
-            >
-              Contacto
-            </a>
-            <button
-              onClick={() => router.push("/taller")}
-              className="w-full bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:opacity-90 transition"
-            >
-              Comprar
-            </button>
-
+          <div className="border-l border-gray-200 pl-4 flex items-center gap-4">
             {isLoggedIn && user ? (
-              <div className="space-y-2 pt-2 border-t border-border">
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-3 text-foreground hover:text-primary transition font-medium py-2"
-                  onClick={() => setIsOpen(false)}
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 font-medium"
                 >
-                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center overflow-hidden border border-primary/20">
+                  <div className="w-9 h-9 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center overflow-hidden">
                     {renderAvatar()}
                   </div>
-                  Ver Perfil ({user.username})
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left text-foreground hover:text-primary transition font-medium flex items-center gap-2 py-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Cerrar Sesión
+                  <span className="text-sm max-w-[100px] truncate">
+                    {user.username}
+                  </span>
                 </button>
+
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-lg shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2 text-sm hover:bg-gray-50"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Ver Perfil
+                    </Link>
+
+                    {isRepresentante && (
+                      <Link
+                        href="/products/catalogo"
+                        className="block px-4 py-2 text-sm hover:bg-gray-50"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Mis Productos
+                      </Link>
+                    )}
+                    {!isRepresentante && !isAdmin && (
+                      <Link
+                        href="/solicitud-representante"
+                        className="block px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 transition"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        ¡Quiero vender en Renova!
+                      </Link>
+                    )}
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        className="block px-4 py-2 text-sm text-amber-700 font-bold hover:bg-amber-50"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Panel de Control
+                      </Link>
+                    )}
+
+                    <div className="h-px bg-gray-100 my-1"></div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" /> Cerrar Sesión
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <Link
                 href="/login"
-                className="block text-foreground hover:text-primary transition font-medium"
+                className="text-sm font-medium hover:text-primary"
               >
                 Inicia Sesión
               </Link>
             )}
           </div>
         </div>
-      )}
+
+        {/* Móvil */}
+        <div className="flex items-center gap-4 md:hidden">
+          <button onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </nav>
     </header>
   );
 }

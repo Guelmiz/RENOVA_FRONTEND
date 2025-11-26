@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 
+// 1. Actualizamos la interfaz User para que coincida con los datos de tu formulario
 export interface User {
   id?: string;
   fullName: string;
@@ -17,12 +18,13 @@ export interface User {
   email?: string;
   registeredAt?: string;
   imagen?: string;
-  roles: string[]; 
+  roles?: string[]; 
 }
 
 interface UserContextType {
   user: User | null;
   token: string | null;
+  setUser: (user: User | null) => void; 
   setUserAndToken: (user: User, token: string) => void;
   logout: () => void;
   isLoggedIn: boolean;
@@ -33,9 +35,9 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 const STORAGE_KEY = "renova_auth";
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+ 
+  const [userState, setUserState] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -45,8 +47,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (!raw) return;
 
       const parsed = JSON.parse(raw);
-      if (parsed?.user && parsed?.token) {
-        setUser(parsed.user);
+      if (parsed?.user) {
+        setUserState(parsed.user);
+      }
+      if (parsed?.token) {
         setToken(parsed.token);
       }
     } catch (err) {
@@ -54,8 +58,31 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  
+  const setUser = (userData: User | null) => {
+    setUserState(userData);
+
+    if (typeof window !== "undefined") {
+      if (userData === null) {
+        const currentToken = token || ""; 
+        if (!currentToken) {
+             localStorage.removeItem(STORAGE_KEY);
+        } else {
+             localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: userData, token: currentToken }));
+        }
+      } else {
+        
+        const currentToken = token || ""; 
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({ user: userData, token: currentToken })
+        );
+      }
+    }
+  };
+
   const setUserAndToken = (userData: User, tokenValue: string) => {
-    setUser(userData);
+    setUserState(userData);
     setToken(tokenValue);
 
     if (typeof window !== "undefined") {
@@ -67,7 +94,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    setUser(null);
+    setUserState(null);
     setToken(null);
     if (typeof window !== "undefined") {
       localStorage.removeItem(STORAGE_KEY);
@@ -77,11 +104,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   return (
     <UserContext.Provider
       value={{
-        user,
+        user: userState,
         token,
+        setUser,
         setUserAndToken,
         logout,
-        isLoggedIn: user !== null,
+        isLoggedIn: userState !== null,
       }}
     >
       {children}
