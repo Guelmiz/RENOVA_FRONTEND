@@ -76,7 +76,7 @@ export function FeaturedProducts() {
                   
                   {/* Etiqueta Top */}
                   <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1">
-                     <Star className="w-3 h-3 fill-current" /> Top Rated
+                     <Star className="w-3 h-3 fill-current" /> Mejor valorado
                   </div>
                 </Link>
 

@@ -124,7 +124,7 @@ function PedidosManager({ token }: { token: string | null }) {
   const updateStatus = async (id: string, nuevoEstado: string) => {
     if (!confirm(`¿Cambiar estado a "${nuevoEstado}"?`)) return;
     try {
-        const res = await fetch(`${API_BASE}/api/admin/pedidos/${id}`, {
+        const res = await fetch(`${API_BASE}/api/pedidos/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify({ estado: nuevoEstado })
