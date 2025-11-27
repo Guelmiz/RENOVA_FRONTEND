@@ -21,7 +21,7 @@ interface LoginResponseDTO {
 }
 
 export async function loginRequest(email: string, password: string) {
-  const res = await fetch(`${API_URL}/login`, {
+  const res = await fetch(`${API_URL}/api/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export async function loginRequest(email: string, password: string) {
 }
 
 export async function logoutRequest(token: string) {
-  const res = await fetch(`${API_URL}/logout`, {
+  const res = await fetch(`${API_URL}/api/logout`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
