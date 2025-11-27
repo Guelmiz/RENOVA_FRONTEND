@@ -65,7 +65,7 @@ export function Header() {
           </a>
 
           <button
-            onClick={() => router.push("/products/catalogo")}
+            onClick={() => router.push("/products")}
             className="bg-primary text-primary-foreground px-5 py-2 rounded-lg hover:opacity-90 text-sm font-medium"
           >
             Comprar

@@ -39,7 +39,6 @@ export default function RegisterPage() {
     }))
   }
 
-  // 👇 NUEVO: manejar el cambio de archivo
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null
     setImageFile(file)
@@ -99,7 +98,6 @@ export default function RegisterPage() {
         return
       }
 
-      // 1️⃣ Primero registramos al usuario (JSON como antes)
       const res = await fetch(`${API_BASE}/api/register`, {
         method: "POST",
         headers: {
@@ -138,7 +136,6 @@ export default function RegisterPage() {
           })
 
           if (!imgRes.ok) {
-            // No rompemos el registro si falla la imagen, solo avisamos por consola
             const imgErr = await imgRes.json().catch(() => ({}))
             console.error("Error subiendo imagen de usuario:", imgErr)
           }
@@ -309,7 +306,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* 👇 NUEVO: Campo de imagen opcional */}
+            {/* Campo imagen opcional */}
             <div className="space-y-2">
               <label htmlFor="image" className="block text-sm font-medium text-foreground">
                 Foto de perfil (opcional)
