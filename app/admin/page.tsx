@@ -105,7 +105,7 @@ function PedidosManager({ token }: { token: string | null }) {
   const fetchPedidos = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/pedidos`, {
+      const res = await fetch(`${API_BASE}/api/pedidos`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
