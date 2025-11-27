@@ -108,7 +108,7 @@ export default function SubirProductoPage() {
       if (res.ok) {
         showToast("¡Producto publicado exitosamente!", "success");
         setTimeout(() => {
-            router.push("/products/my-products");
+            router.push("/products/catalogo");
         }, 2000);
 
       } else {
