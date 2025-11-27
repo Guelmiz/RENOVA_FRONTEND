@@ -10,7 +10,6 @@ export function EditProfile() {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     fullName: user?.fullName || "",
-    age: user?.age || "",
     phone: user?.phone || "",
     birthDate: user?.birthDate || "",
     username: user?.username || "",
@@ -24,9 +23,6 @@ export function EditProfile() {
 
     if (!formData.fullName.trim()) {
       newErrors.fullName = "El nombre completo es requerido"
-    }
-    if (!formData.age || isNaN(Number(formData.age)) || Number(formData.age) < 13) {
-      newErrors.age = "La edad debe ser mayor a 13 años"
     }
     if (!formData.phone.trim()) {
       newErrors.phone = "El teléfono es requerido"
@@ -115,28 +111,7 @@ export function EditProfile() {
           )}
         </div>
 
-        {/* Edad */}
-        <div className="space-y-2">
-          <label htmlFor="age" className="text-sm font-medium text-muted-foreground">
-            Edad
-          </label>
-          {isEditing ? (
-            <>
-              <input
-                id="age"
-                type="number"
-                name="age"
-                value={formData.age}
-                onChange={handleChange}
-                min="13"
-                className="w-full px-4 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              {errors.age && <p className="text-destructive text-sm">{errors.age}</p>}
-            </>
-          ) : (
-            <p className="text-lg font-semibold text-foreground">{user.age} años</p>
-          )}
-        </div>
+
 
         {/* Teléfono */}
         <div className="space-y-2">
@@ -201,7 +176,6 @@ export function EditProfile() {
                 setIsEditing(false)
                 setFormData({
                   fullName: user.fullName,
-                  age: user.age,
                   phone: user.phone,
                   birthDate: user.birthDate,
                   username: user.username,

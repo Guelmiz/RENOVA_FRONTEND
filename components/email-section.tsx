@@ -1,7 +1,8 @@
 'use client'
 
 import { Mail } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+// 1. ELIMINAMOS EL IMPORT DEL BOTÓN
+// import { Button } from '@/components/ui/button' 
 
 export default function EmailSection() {
   return (
@@ -25,12 +26,20 @@ export default function EmailSection() {
 
       {/* Add Email Button */}
       <div className="mt-4">
-        <Button
-          variant="outline"
-          className="text-primary hover:bg-primary/10 border-primary/20 hover:border-primary/30"
+        {/* 2. USAMOS LA ETIQUETA <button> ESTÁNDAR CON CLASES TAILWIND */}
+        <button
+          type="button"
+          className="
+            inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors 
+            h-10 px-4 py-2 
+            border
+            text-primary border-primary/20 
+            hover:bg-primary/10 hover:border-primary/30
+            focus:outline-none focus:ring-2 focus:ring-primary/20
+          "
         >
           + Add Email Address
-        </Button>
+        </button>
       </div>
     </section>
   )

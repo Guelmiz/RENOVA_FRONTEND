@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from "react";
 
-// 1. Actualizamos la interfaz User para que coincida con los datos de tu formulario
 export interface User {
   id?: string;
   fullName: string;
@@ -24,7 +23,8 @@ export interface User {
 interface UserContextType {
   user: User | null;
   token: string | null;
-  setUser: (user: User | null) => void; 
+  setUser: (user: User | null) => void;
+  updateUser: (data: Partial<User>) => void; // <--- 1. AGREGADO AQUÍ
   setUserAndToken: (user: User, token: string) => void;
   logout: () => void;
   isLoggedIn: boolean;
@@ -35,7 +35,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 const STORAGE_KEY = "renova_auth";
 
 export function UserProvider({ children }: { children: ReactNode }) {
- 
+  
   const [userState, setUserState] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
@@ -71,13 +71,30 @@ export function UserProvider({ children }: { children: ReactNode }) {
              localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: userData, token: currentToken }));
         }
       } else {
-        
         const currentToken = token || ""; 
         localStorage.setItem(
           STORAGE_KEY,
           JSON.stringify({ user: userData, token: currentToken })
         );
       }
+    }
+  };
+
+  // 2. IMPLEMENTACIÓN DE LA NUEVA FUNCIÓN
+  const updateUser = (data: Partial<User>) => {
+    if (!userState) return; // No podemos actualizar si no hay usuario
+
+    // Crea un nuevo objeto combinando el usuario actual con los nuevos datos
+    const updatedUser = { ...userState, ...data };
+    
+    setUserState(updatedUser);
+
+    if (typeof window !== "undefined") {
+        const currentToken = token || "";
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ user: updatedUser, token: currentToken })
+        );
     }
   };
 
@@ -107,6 +124,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         user: userState,
         token,
         setUser,
+        updateUser, // <--- 3. EXPUESTO AQUÍ
         setUserAndToken,
         logout,
         isLoggedIn: userState !== null,
